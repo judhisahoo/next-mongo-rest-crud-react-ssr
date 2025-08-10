@@ -18,11 +18,46 @@ export interface AuthState {
   user: User | null;
 }
 
-const initialState: AuthState = {
-  token: null,
-  isAuthenticated: false,
-  user: null,
+const getInitialAuthState = (): AuthState => {
+  if (typeof window !== 'undefined') {
+    const tokenItem = localStorage.getItem('token');
+    const userItem = localStorage.getItem('user');
+
+    if (tokenItem && userItem) {
+      try {
+        const tokenData = JSON.parse(tokenItem);
+        const userData = JSON.parse(userItem);
+        const now = new Date().getTime();
+
+        if (now < tokenData.expiry) {
+          return {
+            token: tokenData.value,
+            isAuthenticated: true,
+            user: userData.value as User,
+          };
+        } else {
+          // Data is expired, clear it
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        }
+      } catch (error) {
+        // Handle parsing errors and clear invalid data
+        console.error('Failed to parse auth data from localStorage:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+    }
+  }
+
+  // Default state for server-side render or if no valid data is found
+  return {
+    token: null,
+    isAuthenticated: false,
+    user: null,
+  };
 };
+
+const initialState: AuthState = getInitialAuthState();
 
 export const authSlice = createSlice({
   name: 'auth',
@@ -48,8 +83,10 @@ export const authSlice = createSlice({
       state.user = null;
 
       // Use helper function to remove items
-      //removeLocalStorageItem('token');
-      //removeLocalStorageItem('user');
+      /*if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }*/
     },
   },
 });

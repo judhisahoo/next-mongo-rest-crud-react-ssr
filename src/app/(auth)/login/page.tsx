@@ -34,13 +34,13 @@ export default function LoginPage() {
 
       const response = await login({ email, password });
       console.log('response in login fun:::', response);
-      const { token, user } = response;
+      const { access_token, user } = response;
 
-      dispatch(setCredentials({ token, user }));
+      dispatch(setCredentials({ token: access_token, user }));
 
       // Handle "Remember Me" functionality
       if (rememberMe) {
-        localStorage.setItem('token', token);
+        localStorage.setItem('token', access_token);
         localStorage.setItem('user', JSON.stringify(user));
       }
 
@@ -170,7 +170,7 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-4 text-center text-sm text-gray-600">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link
             href="/register"
             className="font-medium text-blue-600 hover:text-blue-500"

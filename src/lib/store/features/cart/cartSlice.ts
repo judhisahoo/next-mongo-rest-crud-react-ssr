@@ -13,15 +13,21 @@ export interface CartState {
 }
 
 // Function to get the cart from localStorage
-const getStoredCart = (): CartState => {
+const getInitialCartState = (): CartState => {
   if (typeof window !== 'undefined') {
-    const storeCart = localStorage.getItem('cart');
-    return storeCart ? JSON.parse(storeCart) : { items: [] };
+    try {
+      const cartData = localStorage.getItem('cart');
+      return {
+        items: cartData ? JSON.parse(cartData) : [],
+      };
+    } catch (error) {
+      console.error('Failed to parse cart data from localStorage:', error);
+    }
   }
   return { items: [] };
 };
 
-const initialState: CartState = getStoredCart();
+const initialState: CartState = getInitialCartState();
 
 const cartSlice = createSlice({
   name: 'cart',
@@ -43,7 +49,9 @@ const cartSlice = createSlice({
         state.items.push({ product, quantity });
       }
       // Save cart to localStorage
-      localStorage.setItem('cart', JSON.stringify(state));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('cart', JSON.stringify(state.items));
+      }
     },
     removeCart: (state, action: PayloadAction<string>) => {
       // Remove an item by its product ID
@@ -51,13 +59,17 @@ const cartSlice = createSlice({
         (item) => item.product._id !== action.payload,
       );
       // Save cart to localStorage
-      localStorage.setItem('cart', JSON.stringify(state));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('cart', JSON.stringify(state.items));
+      }
     },
     emptyCart: (state) => {
       // Empty the entire cart
       state.items = [];
       // Clear cart from localStorage
-      localStorage.removeItem('cart');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('cart');
+      }
     },
     // New Reducer: Correctly updates the quantity of an existing item
     updateCart: (
@@ -71,7 +83,9 @@ const cartSlice = createSlice({
         existingItem.quantity = quantity;
       }
       // Save cart to localStorage
-      localStorage.setItem('cart', JSON.stringify(state));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('cart', JSON.stringify(state.items));
+      }
     },
   },
 });
