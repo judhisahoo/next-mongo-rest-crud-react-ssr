@@ -1,7 +1,7 @@
 // src/app/products/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/lib/store/store';
 import {
   setProducts,
@@ -18,8 +18,9 @@ const PRODUCTS_PER_PAGE = 4; // Define the number of products per page
 
 export default function ProductsPage() {
   const dispatch = useAppDispatch();
-  const { products, status, error, currentPage, totalPages, totalProducts } =
-    useAppSelector((state) => state.products);
+  const { products, status, error, currentPage, totalPages } = useAppSelector(
+    (state) => state.products,
+  );
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
   useEffect(() => {
@@ -31,7 +32,7 @@ export default function ProductsPage() {
         const data = await getAllProducts(currentPage, PRODUCTS_PER_PAGE);
         console.log('all products ::', data);
         dispatch(setProducts(data));
-      } catch (err: any) {
+      } catch (err: unknown) {
         dispatch(setError(err.message || 'Failed to fetch products'));
       }
     };

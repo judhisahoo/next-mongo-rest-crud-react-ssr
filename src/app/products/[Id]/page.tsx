@@ -42,7 +42,7 @@ export default function ProductDetailsPage() {
         );
         setProduct(fetchProduct);
         setIsLoading(false);
-      } catch (error: any) {
+      } catch (error: unknown) {
         setError(error.message || 'Failed to fetch product details.');
       } finally {
         setLoading(false);

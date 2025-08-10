@@ -1,10 +1,6 @@
 // src/lib/store/features/auth/authSlice.ts
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import {
-  setLocalStorageWithExpiration,
-  removeLocalStorageItem,
-} from '@/lib/helper/storage';
 
 export interface User {
   _id: string;

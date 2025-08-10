@@ -20,7 +20,6 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [confpassword, setConfpassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  //  const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({}); // State to hold validation errors
 
   const router = useRouter();
@@ -38,51 +37,49 @@ export default function RegisterPage() {
     const sanitizedPhone = DOMPurify.sanitize(phone);
     //const sanitizedAge = DOMPurify.sanitize(age);
     //const sanitizedConfpassword = DOMPurify.sanitize(confpassword);
-    //const sanitizedDob = DOMPurify.sanitize(dob);
+    // Sanitize other inputs as needed
 
     try {
-      console.log('data validation in client side..');
-      // Validate form data using Zod
       registerSchema.parse({
         name: sanitizedName,
         email,
-        password,
         phone: sanitizedPhone,
-        age: Number(age),
+        age: age ? parseInt(age) : undefined,
         dob,
+        password,
         confpassword,
       });
 
-      console.log('cmming for send data to server though API.');
-      // Call the register API helper function
       await register({
-        name: sanitizedName,
+        name,
         email,
+        phone,
+        age: age ? parseInt(age) : undefined,
+        dob,
         password,
-        phone: sanitizedPhone,
-        age: Number(age),
-        dob: new Date(dob),
-        status: true,
       });
-      // Redirect to the login page after successful registration
+
+      //const { access_token, user } = response;
+
+      // dispatch(setCredentials({ token: access_token, user }));
+      // Redirect to the dashboard or profile page after successful registration
+      // router.push('/my-account');
       router.push('/login');
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err instanceof z.ZodError) {
-        // Handle Zod validation errors
         const newErrors: { [key: string]: string } = {};
         for (const issue of err.issues) {
-          newErrors[issue.path[0]] = issue.message;
+          if (issue.path.length > 0) {
+            newErrors[issue.path[0]] = issue.message;
+          }
         }
         setErrors(newErrors);
       } else if (err instanceof AxiosError) {
-        // The interceptor has already handled network errors.
-        // We now handle other server-side errors (e.g., 400, 409).
         setApiError(
           err.response?.data?.message ||
             'Registration failed. Please try again.',
         );
       } else if (err instanceof Error) {
-        // This will catch the custom error thrown by the interceptor
         setApiError(err.message);
       }
     } finally {
@@ -91,248 +88,226 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-      {isLoading && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50">
-          <svg
-            className="animate-spin h-10 w-10 text-white"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            ></circle>
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
-        </div>
-      )}
-      {!isLoading && (
-        <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-xl">
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-            Create Account
-          </h2>
+    <div className="relative flex min-h-screen flex-col items-center justify-center p-4 bg-gray-100">
+      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-xl">
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
+          Register
+        </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Full Name
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                value={name}
-                onChange={(e) => {
-                  setName(e.target.value);
-                  setErrors((prevErrors) => ({
-                    ...prevErrors,
-                    name: undefined,
-                  }));
-                }}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              />
-              {errors.name && (
-                <p className="mt-1 text-sm text-red-500">{errors.name}</p>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => {
-                  (setEmail(e.target.value),
-                    setErrors((prevErrors) => ({
-                      ...prevErrors,
-                      email: undefined,
-                    })));
-                }}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-500">{errors.email}</p>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Phone
-              </label>
-              <input
-                id="phone"
-                name="phone"
-                type="text"
-                required
-                value={phone}
-                onChange={(e) => {
-                  (setPhone(e.target.value),
-                    setErrors((prevErrors) => ({
-                      ...prevErrors,
-                      phone: undefined,
-                    })));
-                }}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              />
-              {errors.phone && (
-                <p className="mt-1 text-sm text-red-500">{errors.phone}</p>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="age"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Age
-              </label>
-              <input
-                id="age"
-                name="age"
-                type="number"
-                required
-                value={age}
-                onChange={(e) => {
-                  (setAge(e.target.value),
-                    setErrors((prevErrors) => ({
-                      ...prevErrors,
-                      age: undefined,
-                    })));
-                }}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              />
-              {errors.age && (
-                <p className="mt-1 text-sm text-red-500">{errors.age}</p>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="dob"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Date of Birth
-              </label>
-              <input
-                id="dob"
-                name="dob"
-                type="date"
-                required
-                value={dob}
-                onChange={(e) => {
-                  (setDob(e.target.value),
-                    setErrors((prevErrors) => ({
-                      ...prevErrors,
-                      dov: undefined,
-                    })));
-                }}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              />
-              {errors.dob && (
-                <p className="mt-1 text-sm text-red-500">{errors.dob}</p>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => {
-                  (setPassword(e.target.value),
-                    setErrors((prevErrors) => ({
-                      ...prevErrors,
-                      password: undefined,
-                    })));
-                }}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              />
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-500">{errors.password}</p>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="confpassword"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Confirm Password
-              </label>
-              <input
-                id="confpassword"
-                name="confpassword"
-                type="password"
-                required={!!password} // Only require if password has a value
-                value={confpassword}
-                onChange={(e) => {
-                  (setConfpassword(e.target.value),
-                    setErrors((prevErrors) => ({
-                      ...prevErrors,
-                      confpassword: undefined,
-                    })));
-                }}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              />
-              {/* The conditional rendering for the error message was missing here */}
-              {errors.confpassword && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.confpassword}
-                </p>
-              )}
-            </div>
-            {apiError && (
-              <p className="text-sm font-medium text-red-600 text-center">
-                {apiError}
-              </p>
-            )}
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? 'Registering...' : 'Register'}
-              </button>
-            </div>
-          </form>
-
-          <p className="mt-4 text-center text-sm text-gray-600">
-            Already have an account?{' '}
-            <Link
-              href="/login"
-              className="underline font-medium text-blue-600 hover:text-blue-500 hover:no-underline"
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Name Input */}
+          <div>
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700"
             >
-              Login here
-            </Link>
-          </p>
-        </div>
-      )}
+              Name
+            </label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              required
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                setErrors((prevErrors) => ({ ...prevErrors, name: undefined }));
+              }}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            />
+            {errors.name && (
+              <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+            )}
+          </div>
+
+          {/* Email Input */}
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setErrors((prevErrors) => ({
+                  ...prevErrors,
+                  email: undefined,
+                }));
+              }}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            />
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+            )}
+          </div>
+
+          {/* Phone Input */}
+          <div>
+            <label
+              htmlFor="phone"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Phone Number
+            </label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              required
+              value={phone}
+              onChange={(e) => {
+                setPhone(e.target.value);
+                setErrors((prevErrors) => ({
+                  ...prevErrors,
+                  phone: undefined,
+                }));
+              }}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            />
+            {errors.phone && (
+              <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+            )}
+          </div>
+
+          {/* Age Input */}
+          <div>
+            <label
+              htmlFor="age"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Age
+            </label>
+            <input
+              id="age"
+              name="age"
+              type="number"
+              value={age}
+              onChange={(e) => {
+                setAge(e.target.value);
+                setErrors((prevErrors) => ({ ...prevErrors, age: undefined }));
+              }}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            />
+            {errors.age && (
+              <p className="mt-1 text-sm text-red-600">{errors.age}</p>
+            )}
+          </div>
+
+          {/* Date of Birth Input */}
+          <div>
+            <label
+              htmlFor="dob"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Date of Birth
+            </label>
+            <input
+              id="dob"
+              name="dob"
+              type="date"
+              required
+              value={dob}
+              onChange={(e) => {
+                setDob(e.target.value);
+                setErrors((prevErrors) => ({ ...prevErrors, dob: undefined }));
+              }}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            />
+            {errors.dob && (
+              <p className="mt-1 text-sm text-red-600">{errors.dob}</p>
+            )}
+          </div>
+
+          {/* Password Input */}
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setErrors((prevErrors) => ({
+                  ...prevErrors,
+                  password: undefined,
+                }));
+              }}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            />
+            {errors.password && (
+              <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+            )}
+          </div>
+
+          {/* Confirm Password Input */}
+          <div>
+            <label
+              htmlFor="confpassword"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Confirm Password
+            </label>
+            <input
+              id="confpassword"
+              name="confpassword"
+              type="password"
+              required
+              value={confpassword}
+              onChange={(e) => {
+                setConfpassword(e.target.value);
+                setErrors((prevErrors) => ({
+                  ...prevErrors,
+                  confpassword: undefined,
+                }));
+              }}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            />
+            {errors.confpassword && (
+              <p className="mt-1 text-sm text-red-600">{errors.confpassword}</p>
+            )}
+          </div>
+
+          {apiError && (
+            <p className="text-sm font-medium text-red-600 text-center">
+              {apiError}
+            </p>
+          )}
+
+          <div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? 'Registering...' : 'Register'}
+            </button>
+          </div>
+        </form>
+
+        <p className="mt-4 text-center text-sm text-gray-600">
+          Already have an account?{' '}
+          <Link
+            href="/login"
+            className="underline font-medium text-blue-600 hover:text-blue-500 hover:no-underline"
+          >
+            Login here
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

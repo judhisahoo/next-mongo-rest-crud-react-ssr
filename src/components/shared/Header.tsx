@@ -1,10 +1,10 @@
 'use client';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '@/lib/store/store';
 import { logout } from '@/lib/store/features/auth/authSlice';
-import { getLocalStorageWithExpiration } from '@/lib/helper/storage';
+//import { getLocalStorageWithExpiration } from '@/lib/helper/storage';
 
 export default function Header() {
   const router = useRouter();

@@ -2,7 +2,7 @@
 'use client';
 import { useEffect } from 'react';
 import { useAppDispatch } from '@/lib/store/store';
-import { setCredentials, logout } from '@/lib/store/features/auth/authSlice';
+import { setCredentials } from '@/lib/store/features/auth/authSlice';
 import { getLocalStorageWithExpiration } from '@/lib/helper/storage';
 
 export default function AuthInitializer() {

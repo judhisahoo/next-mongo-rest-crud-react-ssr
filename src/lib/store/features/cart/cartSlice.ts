@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Product } from '@/lib/store/features/products/productSlice';
-import { number, string } from 'zod';
 
 // Define the shape of a single item in the cart
 export interface CartItem {

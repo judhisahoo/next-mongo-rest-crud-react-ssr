@@ -10,7 +10,7 @@ export const login = async (credentials: LoginDto) => {
   return response.data;
 };
 
-export const register = async (userData: any) => {
+export const register = async (userData: unknown) => {
   console.log('now calling nest js api');
   const response = await axiosInstance.post('/auth/register', userData);
   console.log('api response', response);
