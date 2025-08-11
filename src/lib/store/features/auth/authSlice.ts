@@ -23,6 +23,9 @@ const getInitialAuthState = (): AuthState => {
     const tokenItem = localStorage.getItem('token');
     const userItem = localStorage.getItem('user');
 
+    console.log('tokenItem ::', tokenItem);
+    console.log('userItem ::', userItem);
+
     if (tokenItem && userItem) {
       try {
         const tokenData = JSON.parse(tokenItem);
@@ -36,20 +39,27 @@ const getInitialAuthState = (): AuthState => {
             user: userData.value as User,
           };
         } else {
-          // Data is expired, clear it
+          // Token has expired, clear localStorage
+          console.log(
+            "removing localStorage.removeItem('token') with getInitialAuthState() method",
+          );
           localStorage.removeItem('token');
           localStorage.removeItem('user');
         }
       } catch (error) {
-        // Handle parsing errors and clear invalid data
+        // This block handles the case where JSON.parse fails on a raw string
         console.error('Failed to parse auth data from localStorage:', error);
+        // Clear the bad data to prevent future errors
+        console.log(
+          "removing localStorage.removeItem('token') try with cath of getInitialAuthState() method",
+        );
         localStorage.removeItem('token');
         localStorage.removeItem('user');
       }
     }
   }
 
-  // Default state for server-side render or if no valid data is found
+  // Default state for server-side rendering or if no valid data is found
   return {
     token: null,
     isAuthenticated: false,
@@ -71,26 +81,40 @@ export const authSlice = createSlice({
       state.isAuthenticated = true;
       state.user = action.payload.user;
 
-      localStorage.setItem('token', action.payload.token);
-      localStorage.setItem('user', JSON.stringify(action.payload.user));
-      // Use the helper function to store with expiration
-      //setLocalStorageWithExpiration('token', action.payload.token, 1);
-      //setLocalStorageWithExpiration('user', action.payload.user, 1);
+      const now = new Date();
+      const expiry = now.getTime() + 60 * 60 * 1000; // 1 hour expiration
+      if (typeof window !== 'undefined') {
+        const tokenJSONStringify = JSON.stringify({
+          value: action.payload.token,
+          expiry,
+        });
+
+        const userJSONStringify = JSON.stringify({
+          value: action.payload.user,
+          expiry,
+        });
+
+        console.log('tokenJSONStringify ::', tokenJSONStringify);
+        console.log('userJSONStringify ::', userJSONStringify);
+
+        localStorage.setItem('token', tokenJSONStringify);
+        localStorage.setItem('user', userJSONStringify);
+      }
     },
     logout: (state) => {
       state.token = null;
       state.isAuthenticated = false;
       state.user = null;
-
-      // Use helper function to remove items
-      /*if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-      }*/
+      if (typeof window !== 'undefined') {
+        console.log(
+          "removing localStorage.removeItem('token') with logout action",
+        );
+        //localStorage.removeItem('token');
+        //localStorage.removeItem('user');
+      }
     },
   },
 });
 
 export const { setCredentials, logout } = authSlice.actions;
-
 export default authSlice.reducer;

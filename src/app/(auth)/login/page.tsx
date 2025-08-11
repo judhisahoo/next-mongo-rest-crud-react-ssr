@@ -39,10 +39,10 @@ export default function LoginPage() {
       dispatch(setCredentials({ token: access_token, user }));
 
       // Handle "Remember Me" functionality
-      if (rememberMe) {
+      /*if (rememberMe) {
         localStorage.setItem('token', access_token);
         localStorage.setItem('user', JSON.stringify(user));
-      }
+      }*/
 
       const redirectPath = searchParams.get('redirect');
 

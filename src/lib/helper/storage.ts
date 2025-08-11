@@ -27,7 +27,10 @@ export const getLocalStorageWithExpiration = (key) => {
     const now = new Date();
 
     if (now.getTime() > item.expiry) {
-      localStorage.removeItem(key);
+      console.log(
+        'calling getLocalStorageWithExpiration() from storage.ts. removing storage due to if (now.getTime() > item.expiry) {',
+      );
+      //localStorage.removeItem(key);
       return null;
     }
 
@@ -35,13 +38,17 @@ export const getLocalStorageWithExpiration = (key) => {
   } catch (error) {
     // This catches the SyntaxError for invalid JSON
     console.error(`Error parsing localStorage item for key "${key}":`, error);
-    localStorage.removeItem(key); // Clear the bad data
+    console.log(
+      'calling getLocalStorageWithExpiration() from storage.ts. now at catch part of try',
+    );
+    //localStorage.removeItem(key); // Clear the bad data
     return null;
   }
 };
 
 export const removeLocalStorageItem = (key) => {
   if (typeof window !== 'undefined') {
-    localStorage.removeItem(key);
+    console.log('calling removeLocalStorageItem() from storage.ts');
+    //localStorage.removeItem(key);
   }
 };
