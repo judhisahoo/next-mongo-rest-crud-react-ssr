@@ -49,6 +49,6 @@ export const getLocalStorageWithExpiration = (key) => {
 export const removeLocalStorageItem = (key) => {
   if (typeof window !== 'undefined') {
     console.log('calling removeLocalStorageItem() from storage.ts');
-    //localStorage.removeItem(key);
+    localStorage.removeItem(key);
   }
 };
