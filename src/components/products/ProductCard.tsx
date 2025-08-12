@@ -3,12 +3,14 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Product } from '@/lib/store/features/products/productSlice';
 import { useAppSelector } from '@/lib/store/store'; // Import the hook
+import { FaEdit, FaTrash } from 'react-icons/fa';
 
 interface ProductCardProps {
   product: Product;
+  onDelete: (id: string) => void; // A function to trigger the deletion process
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+const ProductCard: React.FC<ProductCardProps> = ({ product, onDelete }) => {
   // Access the authentication status directly from Redux
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   return (
@@ -55,8 +57,13 @@ export default function ProductCard({ product }: ProductCardProps) {
               >
                 Edit
               </Link>
-              <button className="flex-1 text-center bg-red-500 text-white px-3 py-1 rounded-md text-sm font-medium hover:bg-red-600 transition-colors">
-                Delete
+              {/* Delete button, calls the onDelete function */}
+              <button
+                onClick={() => onDelete(product._id)}
+                className="p-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                aria-label={`Delete ${product.name}`}
+              >
+                <FaTrash />
               </button>
             </>
           )}
@@ -64,4 +71,6 @@ export default function ProductCard({ product }: ProductCardProps) {
       </div>
     </div>
   );
-}
+};
+
+export default ProductCard;

@@ -64,9 +64,19 @@ export const productsSlice = createSlice({
     setCurrentPage: (state, action: PayloadAction<number>) => {
       state.currentPage = action.payload; // Added a new reducer to change the page
     },
+    removeProduct: (state, action: PayloadAction<string>) => {
+      state.products = state.products.filter(
+        (product) => product._id !== action.payload,
+      );
+    },
   },
 });
 
-export const { setProducts, setLoading, setError, setCurrentPage } =
-  productsSlice.actions;
+export const {
+  setProducts,
+  setLoading,
+  setError,
+  setCurrentPage,
+  removeProduct,
+} = productsSlice.actions;
 export default productsSlice.reducer;

@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Product } from '@/lib/store/features/products/productSlice';
+import { RootState } from '../../store';
 
 // Define the shape of a single item in the cart
 export interface CartItem {
@@ -91,5 +92,9 @@ const cartSlice = createSlice({
 });
 
 export const { addCart, removeCart, emptyCart, updateCart } = cartSlice.actions;
+
+// New selector to calculate the total quantity of all items in the cart
+export const getTotalCartQty = (state: RootState) =>
+  state.cart.items.reduce((total, item) => total + item.quantity, 0);
 
 export default cartSlice.reducer;

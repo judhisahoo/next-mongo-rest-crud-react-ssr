@@ -1,20 +1,21 @@
-// src/app/products/page.tsx
 'use client';
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/lib/store/store';
 import {
   setProducts,
   setLoading,
   setError,
   setCurrentPage,
+  removeProduct,
 } from '@/lib/store/features/products/productSlice';
-import { getAllProducts } from '@/lib/api/api';
+import { getAllProducts, deleteProduct } from '@/lib/api/api';
 import ProductCard from '@/components/products/ProductCard';
-import Pagination from '@/components/Pagination'; // You'll need to create this component
+import Pagination from '@/components/Pagination';
 import Link from 'next/link';
+import { AxiosError } from 'axios';
 
-const PRODUCTS_PER_PAGE = 4; // Define the number of products per page
+const PRODUCTS_PER_PAGE = 4;
 
 export default function ProductsPage() {
   const dispatch = useAppDispatch();
@@ -23,25 +24,59 @@ export default function ProductsPage() {
   );
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
+  const [productIdToDelete, setProductIdToDelete] = useState<string | null>(
+    null,
+  );
+
   useEffect(() => {
-    // This effect will run when the component mounts or when the currentPage changes
     const fetchProductsData = async () => {
       try {
         dispatch(setLoading());
-        // Pass currentPage and PRODUCTS_PER_PAGE to the API helper
         const data = await getAllProducts(currentPage, PRODUCTS_PER_PAGE);
-        console.log('all products ::', data);
         dispatch(setProducts(data));
       } catch (err: unknown) {
-        dispatch(setError(err.message || 'Failed to fetch products'));
+        dispatch(
+          setError((err as Error).message || 'Failed to fetch products'),
+        );
       }
     };
     fetchProductsData();
-  }, [currentPage, dispatch]); // Dependency array includes currentPage
+  }, [currentPage, dispatch]);
 
   const handlePageChange = (page: number) => {
     dispatch(setCurrentPage(page));
   };
+
+  const handleDeleteClick = (id: string) => {
+    setProductIdToDelete(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!productIdToDelete) return;
+
+    try {
+      await deleteProduct(productIdToDelete);
+      dispatch(removeProduct(productIdToDelete));
+      setProductIdToDelete(null);
+    } catch (err: unknown) {
+      const errorMessage =
+        (err as AxiosError)?.response?.data?.message ||
+        (err as Error)?.message ||
+        'Failed to delete product.';
+      dispatch(setError(errorMessage));
+      setProductIdToDelete(null);
+    }
+  };
+
+  if (status === 'loading') {
+    return (
+      <p className="text-center text-lg text-gray-600">Loading products...</p>
+    );
+  }
+
+  if (status === 'failed') {
+    return <p className="text-center text-lg text-red-500">Error: {error}</p>;
+  }
 
   return (
     <div className="container mx-auto p-2">
@@ -57,29 +92,46 @@ export default function ProductsPage() {
         )}
       </div>
 
-      {status === 'loading' && (
-        <p className="text-center text-lg text-gray-600">Loading products...</p>
-      )}
-      {status === 'failed' && (
-        <p className="text-center text-lg text-red-500">Error: {error}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {products.map((product) => (
+          // The fix is here: passing the handleDeleteClick function as the onDelete prop
+          <ProductCard
+            key={product._id}
+            product={product}
+            onDelete={handleDeleteClick}
+          />
+        ))}
+      </div>
+
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       )}
 
-      {status === 'succeeded' && (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {products.map((product) => (
-              <ProductCard key={product._id} product={product} />
-            ))}
+      {productIdToDelete && (
+        <div className="fixed inset-0 bg-gray-200 bg-opacity-20 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
+            <h2 className="text-lg font-bold mb-4">Confirm Deletion</h2>
+            <p>Are you sure you want to delete this product?</p>
+            <div className="mt-6 flex justify-end space-x-2">
+              <button
+                onClick={() => setProductIdToDelete(null)}
+                className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
           </div>
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
-          )}
-        </>
+        </div>
       )}
     </div>
   );

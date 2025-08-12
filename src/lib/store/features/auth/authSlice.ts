@@ -37,7 +37,7 @@ export const authSlice = createSlice({
       state.token = action.payload.token;
       state.isAuthenticated = true;
       state.user = action.payload.user;
-
+      console.log('now state.user', state.user);
       const now = new Date();
       const expiry = now.getTime() + 60 * 60 * 1000; // 1 hour expiration
       if (typeof window !== 'undefined') {
@@ -55,10 +55,10 @@ export const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
       state.user = null;
-      if (typeof window !== 'undefined') {
+      /*if (typeof window !== 'undefined') {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-      }
+      }*/
     },
   },
 });

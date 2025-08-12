@@ -166,3 +166,9 @@ onChange={(e) => {
                 <p className="mt-1 text-sm text-red-500">{errors.name}</p>
               )}
 ```
+
+```sh
+npm install react-hook-form zod @hookform/resolvers
+
+npm i react-icons --save --force
+```
