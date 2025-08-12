@@ -8,9 +8,7 @@ import DOMPurify from 'dompurify';
 import { z } from 'zod';
 import { AxiosError } from 'axios';
 import { User } from '@/lib/store/features/auth/authSlice';*/
-import ProfileForm from '@/components/auth/Profile';
 import { useAppSelector } from '@/lib/store/store';
-import { Lakki_Reddy } from 'next/font/google';
 
 export default function MyPage() {
   const router = useRouter();

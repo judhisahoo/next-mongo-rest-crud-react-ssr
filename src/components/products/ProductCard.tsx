@@ -55,7 +55,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onDelete }) => {
                 href={`/products/edit/${product._id}`}
                 className="flex-1 flex items-center justify-center bg-yellow-500 text-white px-3 py-1 rounded-md text-sm font-medium hover:bg-yellow-600 transition-colors"
               >
-                Edit
+                <FaEdit />
               </Link>
               {/* Delete button, calls the onDelete function */}
               <button
